@@ -31,5 +31,14 @@ router.post("/api/echo", (req, res) => {
     const body = req.body;
     res.json(body);
 });
+router.get("/health", (req, res) => {
+    res.json({
+        status: "OK"
+    });
+});
+// //this function is for testing(should be removed later)
+// router.get("/crash", (req, res) => {
+//     throw new Error("Something went wrong bro!");
+// });
 
 export default router;
