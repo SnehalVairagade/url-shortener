@@ -1,5 +1,5 @@
 import { Router } from "express";
-
+import healthController from "../controllers/healthController"
 const router=Router();
 
 router.get("/", (req, res) => {
@@ -31,11 +31,16 @@ router.post("/api/echo", (req, res) => {
     const body = req.body;
     res.json(body);
 });
-router.get("/health", (req, res) => {
-    res.json({
-        status: "OK"
-    });
-});
+
+//this down is old it was updated but i kept it to show it was like this before
+// router.get("/health", (req, res) => {
+//     res.json({
+//         status: "OK"
+//     });
+// });
+
+router.use("/health",healthController);
+
 // //this function is for testing(should be removed later)
 // router.get("/crash", (req, res) => {
 //     throw new Error("Something went wrong bro!");

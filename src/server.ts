@@ -2,14 +2,14 @@ import express from "express";
 import healthRouter from "./routes/health";
 import { logger } from "./middleware/logger";
 import { errorHandler } from "./middleware/errorHandler";
-
+import {config} from "./config/env"
 const app = express();
 
 app.use(logger);
 
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = config.PORT;
 //everything gets directed to healthrouter/health route(file)
 app.use("/", healthRouter);
 
