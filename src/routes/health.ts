@@ -1,5 +1,6 @@
 import { Router } from "express";
-import healthController from "../controllers/healthController"
+import healthController from "../controllers/healthController";
+import { createShortUrlController } from "../controllers/url.controller"
 const router=Router();
 
 router.get("/", (req, res) => {
@@ -39,7 +40,7 @@ router.post("/api/echo", (req, res) => {
 //     });
 // });
 
-router.use("/health",healthController);
+router.use("/shorten",createShortUrlController);
 
 // //this function is for testing(should be removed later)
 // router.get("/crash", (req, res) => {
