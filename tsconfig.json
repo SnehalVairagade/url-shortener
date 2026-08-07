@@ -4,6 +4,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
+    "types": ["node"],
+
     "rootDir": "./src",
     "outDir": "./dist",
 
@@ -15,5 +17,6 @@
     "forceConsistentCasingInFileNames": true
   },
 
-  "include": ["src"]
+  "include": ["src",
+  "prisma.config.ts"]
 }
