@@ -23,6 +23,7 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 //this starts the server,after it we generally don't register more middleware
-app.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}`);
+app.listen(config.PORT, () => {
+    console.log(`Server running on port ${config.PORT}`);
+    console.log(`Search API: http://localhost:${config.PORT}/`);
 });

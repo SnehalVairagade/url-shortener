@@ -6,16 +6,23 @@ export const createShortUrlSchema = z.object({
     .trim()
     .min(1, "URL is required")
     .url("Please enter a valid URL")
-    .refine(
+    .refine(//if error thrown and not exit this also runs so new error will come
       (value) => {
-        const parsed = new URL(value);
-        return (
-          parsed.protocol === "http:" ||
-          parsed.protocol === "https:"
-        );
+        try{
+          const parsed = new URL(value);//directly using the url library
+          return (
+            parsed.protocol === "http:" ||
+            parsed.protocol === "https:"
+          );
+
+        }
+        catch{
+          return false;
+
+        }
       },
       {
-        message: "Only HTTP and HTTPS URLs are allowed",
-      }
-    ),
+        message: "Only HTTP and HTTPS URLs are allowed"
+    }
+    )
 });

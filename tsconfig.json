@@ -6,7 +6,7 @@
 
     "types": ["node"],
 
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
 
     "strict": true,
@@ -17,6 +17,5 @@
     "forceConsistentCasingInFileNames": true
   },
 
-  "include": ["src",
-  "prisma.config.ts"]
+  "include": ["src/**/*.ts", "prisma.config.ts"]
 }
