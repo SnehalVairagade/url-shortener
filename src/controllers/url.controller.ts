@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createShortUrlSchema } from "../validators/url.validator";
-import { createShortUrl } from "../services/url.service";
+import { createShortUrl, getUrlByShortCode  } from "../services/url.service";
 //Use Express's definition of what a Request looks like
 
 //Express creates the req and res objects for each incoming HTTP request and passes them to your controller when it invokes it.
@@ -21,3 +21,16 @@ export async function createShortUrlController(req: Request, res: Response){
         });
     }
 };
+export async function getShortUrlController(req: Request, res: Response) {
+    const shortCode = String(req.params.shortCode);
+
+    const url = await getUrlByShortCode(shortCode);
+
+    if (!url) {
+        return res.status(404).json({
+            message: "Short URL not found"
+        });
+    }
+
+    return res.redirect(302, url.originalUrl);
+}

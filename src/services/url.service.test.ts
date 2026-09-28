@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { prisma } from "../db/prisma";
-import { createShortUrl } from "./url.service";
+import { createShortUrl, getUrlByShortCode } from "./url.service";
 import { generateShortCode } from "./short-code.service";
 import { Prisma } from "../generated/prisma/client";
 
@@ -20,6 +20,49 @@ vi.mock("./short-code.service", () => ({
 describe("createShortUrl", () => {
     beforeEach(() => {
         vi.resetAllMocks();
+    });
+    it("returns the URL for an existing short code", async () => {
+        const mockUrl = {
+            id: 1,
+            originalUrl: "https://www.google.com",
+            shortCode: "gSnA09",
+            clickCount: 0,
+            createdAt: new Date()
+        };
+
+        vi.mocked(prisma.url.findUnique).mockResolvedValue(mockUrl);
+
+        const result = await getUrlByShortCode("gSnA09");
+
+        expect(result).toEqual(mockUrl);
+        expect(prisma.url.findUnique).toHaveBeenCalledWith({
+            where: {
+                shortCode: "gSnA09"
+            }
+        });
+    });
+
+    it("returns null when the short code does not exist", async () => {
+        vi.mocked(prisma.url.findUnique).mockResolvedValue(null);
+
+        const result = await getUrlByShortCode("doesnotexist");
+
+        expect(result).toBeNull();
+        expect(prisma.url.findUnique).toHaveBeenCalledWith({
+            where: {
+                shortCode: "doesnotexist"
+            }
+        });
+    });
+
+    it("propagates unexpected database errors", async () => {
+        const error = new Error("Database failure");
+
+        vi.mocked(prisma.url.findUnique).mockRejectedValue(error);
+
+        await expect(
+            getUrlByShortCode("abc123")
+        ).rejects.toThrow("Database failure");
     });
 
     it("creates a new URL", async () => {

@@ -55,3 +55,13 @@ export async function createShortUrl(originalUrl: string) {
     }
     return url;
 }
+
+export async function getUrlByShortCode(shortCode: string) {
+    const url = await prisma.url.findUnique({
+        where: {
+            shortCode
+        }
+    });
+
+    return url;
+}
