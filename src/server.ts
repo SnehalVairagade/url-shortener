@@ -6,7 +6,22 @@ import { config } from "./config/env";
 
 const app = express();
 
-app.use(logger);
+// Structured Request Logger
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+        const duration = Date.now() - start;
+        logger.info({
+            message: "Request Processed",
+            method: req.method,
+            path: req.path,
+            status: res.statusCode,
+            duration: `${duration}ms`,
+            ip: req.ip
+        });
+    });
+    next();
+});
 
 app.use(express.json());
 
@@ -17,18 +32,34 @@ app.use("/", healthRouter);
 
 // 404 handler
 app.use((req, res) => {
+    logger.warn({
+        message: "Route not found",
+        path: req.path,
+        ip: req.ip
+    });
     res.status(404).json({
         error: "Route not found"
     });
 });
 
 // centralized error handler
+app.use((err, req, res, next) => {
+    logger.error({
+        message: "Unhandled Exception",
+        error: err.message,
+        stack: err.stack,
+        path: req.path,
+        ip: req.ip
+    });
+    next(err);
+});
+
 app.use(errorHandler);
 
 function startServer() {
     app.listen(config.PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-        console.log(`Search API: http://localhost:${PORT}/`);
+        logger.info(`Server running on port ${PORT}`);
+        logger.info(`Search API: http://localhost:${PORT}/`);
     });
 }
 

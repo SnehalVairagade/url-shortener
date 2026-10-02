@@ -19,4 +19,5 @@ model Url {
   shortCode   String   @unique
   clickCount  Int      @default(0)
   createdAt   DateTime @default(now())
+  expiresAt   DateTime?
 }

@@ -9,6 +9,7 @@ export function errorHandler(
     console.error(err);
 
     res.status(500).json({
-        error: "Internal Server Error,we wrote this code btw"
+        error: "Internal Server Error",
+        message: "An unexpected error occurred on the server."
     });
 }
