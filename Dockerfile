@@ -11,6 +11,9 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # We use tsx to run the server directly from typescript for simplicity in this project,
 # though in a huge production app we'd pre-compile to JS.
 EXPOSE 3000

@@ -81,7 +81,7 @@ docker compose exec app npx prisma migrate deploy
 This applies all pending Prisma migrations to the PostgreSQL database.
 
 ### 4. Test the API
-
+> **Windows users:** The `curl.exe` command below is intended to be run from **Command Prompt (CMD)**. PowerShell may interpret the quotes differently and cause the JSON request to fail.
 **Create a Shortened URL**
 
 On Windows:
