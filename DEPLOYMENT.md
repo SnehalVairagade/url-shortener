@@ -2,10 +2,12 @@
 
 This document describes the production deployment strategy for the URL Shortener API.
 
-##  Deployment Architecture
-The application is designed as a **Stateless API**, allowing it to be scaled horizontally across multiple containers or serverless instances.
+## Deployment Architecture
+
+The application is designed as a **stateless API**, allowing it to be scaled horizontally across multiple containers or serverless instances.
 
 ### Stack
+
 - **Runtime**: Node.js 20 (Alpine)
 - **Database**: PostgreSQL 16 (Persistent Storage)
 - **Cache**: Redis 7 (Ephemeral Speed Layer)
@@ -13,50 +15,89 @@ The application is designed as a **Stateless API**, allowing it to be scaled hor
 
 ---
 
-##  Deployment Steps
+## Deployment Steps
 
 ### 1. Infrastructure Setup
-We recommend using a PaaS like **Render**, **Railway**, or **Fly.io** for a balance of simplicity and professional control.
+
+The application can be deployed using a PaaS such as **Render**, **Railway**, or **Fly.io**, or using another Docker-compatible hosting platform.
 
 **Required Resources:**
-- One Managed PostgreSQL instance.
-- One Managed Redis instance.
-- One Web Service (Docker-based).
+
+- One managed PostgreSQL instance
+- One managed Redis instance
+- One web service running the Docker image
 
 ### 2. Environment Configuration
-The following secrets must be configured in the production environment dashboard:
+
+The following environment variables must be configured in the production environment:
 
 | Variable | Description | Example |
 | :--- | :--- | :--- |
 | `PORT` | Port the server listens on | `3000` |
 | `NODE_ENV` | Environment mode | `production` |
-| `DATABASE_URL` | Connection string for Postgres | `postgresql://user:pass@host:5432/db` |
+| `DATABASE_URL` | Connection string for PostgreSQL | `postgresql://user:password@host:5432/db` |
 | `REDIS_URL` | Connection string for Redis | `redis://host:6379` |
 
-### 3. The CI/CD Pipeline
-The ideal deployment flow is:
-`Git Push` $\rightarrow$ `GitHub Actions/Render Build` $\rightarrow$ `Prisma Migrate` $\rightarrow$ `Application Start`
+> **Security**: Never commit production credentials or secrets to Git. Configure them through the hosting provider's environment-variable settings.
 
-#### Critical: Database Migrations
-In production, **never** use `prisma migrate dev`. Instead, use:
+### 3. Build and Start
+
+The production container should build the application and run the compiled JavaScript output.
+
+```bash
+npm run build
+npm start
+```
+
+The Docker image can be used directly by a Docker-compatible hosting provider.
+
+### 4. Database Migrations
+
+Before starting the application against a production database, apply all pending Prisma migrations:
+
 ```bash
 npx prisma migrate deploy
 ```
-**Why?** `migrate deploy` applies pending migrations without attempting to reset the database or prompt for manual intervention, making it safe for automated pipelines.
+
+**Important**: Do not use `prisma migrate dev` in production. `prisma migrate deploy` applies the migrations already defined in the repository without creating development migrations or resetting the database.
 
 ---
 
-##  Production Hardening
+## CI/CD Pipeline
+
+A typical deployment flow is:
+
+`Git Push` $\rightarrow$ `Build Docker Image` $\rightarrow$ `Run Database Migrations` $\rightarrow$ `Start Application` $\rightarrow$ `Health Check`
+
+This process can be automated using GitHub Actions or the CI/CD functionality provided by the hosting platform.
+
+---
+
+## Production Hardening
 
 ### Process Management
-The application is built to be run using the compiled JavaScript output:
+The application is designed to run using the compiled JavaScript output:
 ```bash
-npm run build  # Compiles TS to JS via tsc
-npm start       # Runs the compiled JS via node
+npm run build
+npm start
 ```
 
 ### Health Monitoring
-The `/` endpoint serves as a basic heartbeat check for the load balancer to ensure the container is healthy.
+The `/` endpoint can be used as a basic health/heartbeat endpoint by the hosting platform or load balancer.
 
 ### Scaling
-Because we use **Redis** for caching and **PostgreSQL** for persistence, we can spin up multiple instances of the `app` container. All instances will share the same cache and database, ensuring consistent behavior across the cluster.
+The API is designed to be stateless, so multiple application instances can run simultaneously. All instances can share:
+- **PostgreSQL** for persistent application data.
+- **Redis** for shared caching.
+
+This allows the application layer to scale horizontally without requiring local application state.
+
+---
+
+## Important Production Considerations
+- Use managed PostgreSQL with persistent storage.
+- Use a managed Redis instance.
+- Store credentials only in environment variables.
+- Use `prisma migrate deploy` for production migrations.
+- Do not commit `.env` files or production secrets.
+- Configure the hosting platform to use the application's health endpoint.
